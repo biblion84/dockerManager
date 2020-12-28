@@ -13,7 +13,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
+	cli.NegotiateAPIVersion(context.Background())
 	containers, err := cli.ContainerList(context.Background(), types.ContainerListOptions{})
 	if err != nil {
 		panic(err)
