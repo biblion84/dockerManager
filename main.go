@@ -21,10 +21,11 @@ func main() {
 
 	target := flag.Int("target", 0, "query running containers, add container till target reached")
 	flag.Parse()
-
+	fmt.Println(*target)
 	for {
 		containers, err := cli.ContainerList(context.Background(), types.ContainerListOptions{})
 		if len(containers) < *target {
+			fmt.Println("Trying to create container")
 			_, err := cli.ContainerCreate(context.Background(), &container.Config{
 				Image: "ektor-client-scratch",
 			}, &container.HostConfig{
