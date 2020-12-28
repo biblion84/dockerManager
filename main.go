@@ -17,16 +17,18 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	cli.NegotiateAPIVersion(context.Background())
+	ctx := context.Background()
+	cli.NegotiateAPIVersion(ctx)
 
 	target := flag.Int("target", 0, "query running containers, add container till target reached")
 	flag.Parse()
 	fmt.Println(*target)
 	for {
+
 		containers, err := cli.ContainerList(context.Background(), types.ContainerListOptions{})
 		if len(containers) < *target {
 			fmt.Println("Trying to create container")
-			_, err := cli.ContainerCreate(context.Background(), &container.Config{
+			resp, err := cli.ContainerCreate(ctx, &container.Config{
 				Tty:   true,
 				Image: "ektor-client-scratch",
 			}, &container.HostConfig{
@@ -35,11 +37,16 @@ func main() {
 					Memory: 30720000,
 				},
 			}, &network.NetworkingConfig{}, nil, "")
-
 			if err != nil {
 				fmt.Println("ERRORRR")
 				fmt.Println(err)
 			}
+			err = cli.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{})
+			if err != nil {
+				fmt.Println("ERRORRR")
+				fmt.Println(err)
+			}
+
 		}
 		if err != nil {
 			panic(err)
