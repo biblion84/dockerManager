@@ -26,7 +26,8 @@ func main() {
 	for {
 
 		containers, err := cli.ContainerList(context.Background(), types.ContainerListOptions{})
-		if len(containers) < *target {
+		numberToAdd := *target - len(containers)
+		for i := 0; i < numberToAdd; i++ {
 			fmt.Println("Trying to create container")
 			resp, err := cli.ContainerCreate(ctx, &container.Config{
 				Tty:   true,
@@ -45,16 +46,14 @@ func main() {
 			if err != nil {
 				fmt.Println("ERRORRR")
 				fmt.Println(err)
+			} else {
+				fmt.Println("Created")
 			}
-
 		}
 		if err != nil {
 			panic(err)
 		}
-
-		for _, container := range containers {
-			fmt.Printf("%s %s\n", container.ID[:10], container.Image)
-		}
+		fmt.Println("Sleeping a minute")
 		time.Sleep(time.Minute)
 	}
 }
