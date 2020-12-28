@@ -27,6 +27,7 @@ func main() {
 		if len(containers) < *target {
 			fmt.Println("Trying to create container")
 			_, err := cli.ContainerCreate(context.Background(), &container.Config{
+				Tty:   true,
 				Image: "ektor-client-scratch",
 			}, &container.HostConfig{
 				NetworkMode: "host",
@@ -36,6 +37,7 @@ func main() {
 			}, &network.NetworkingConfig{}, nil, "")
 
 			if err != nil {
+				fmt.Println("ERRORRR")
 				fmt.Println(err)
 			}
 		}
