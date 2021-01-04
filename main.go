@@ -35,7 +35,7 @@ func main() {
 			}, &container.HostConfig{
 				NetworkMode: "host",
 				Resources: container.Resources{
-					Memory: 30720000,
+					Memory: 40720000,
 				},
 			}, &network.NetworkingConfig{}, nil, "")
 			if err != nil {
