@@ -4,56 +4,74 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"github.com/docker/docker/api/types/container"
-	"github.com/docker/docker/api/types/network"
+	"log"
 	"time"
 
 	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/client"
+)
+
+var (
+	target  = flag.Int("target", 10, "query running containers, add container till target reached")
+	image   = flag.String("image", "", "Name of the image to be launched")
+	verbose = flag.Bool("verbose", false, "Verbose")
 )
 
 func main() {
 	cli, err := client.NewClientWithOpts(client.FromEnv)
-	if err != nil {
-		panic(err)
-	}
+	ck(err)
 	ctx := context.Background()
 	cli.NegotiateAPIVersion(ctx)
 
-	target := flag.Int("target", 0, "query running containers, add container till target reached")
 	flag.Parse()
-	fmt.Println(*target)
+
+	if *image == "" {
+		flag.PrintDefaults()
+		log.Fatal("Expected a docker image")
+	}
+
+	pt(target)
 	for {
 
 		containers, err := cli.ContainerList(context.Background(), types.ContainerListOptions{})
 		numberToAdd := *target - len(containers)
 		for i := 0; i < numberToAdd; i++ {
-			fmt.Println("Trying to create container")
+			pt("Trying to create container")
 			resp, err := cli.ContainerCreate(ctx, &container.Config{
 				Tty:   true,
-				Image: "ektor-client-scratch",
+				Image: *image,
 			}, &container.HostConfig{
 				NetworkMode: "host",
 				Resources: container.Resources{
 					Memory: 50720000,
 				},
 			}, &network.NetworkingConfig{}, nil, "")
-			if err != nil {
-				fmt.Println("ERRORRR")
-				fmt.Println(err)
-			}
+
+			ck(err)
+
 			err = cli.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{})
-			if err != nil {
-				fmt.Println("ERRORRR")
-				fmt.Println(err)
-			} else {
-				fmt.Println("Created")
+
+			ck(err)
+
+			if err == nil {
+				pt("Created")
 			}
 		}
-		if err != nil {
-			panic(err)
-		}
-		fmt.Println("Sleeping a minute")
+		ck(err)
 		time.Sleep(time.Minute)
+	}
+}
+
+func ck(err error) {
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func pt(a ...interface{}) {
+	if *verbose {
+		fmt.Println(a)
 	}
 }

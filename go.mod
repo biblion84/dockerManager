@@ -1,4 +1,4 @@
-module ektora.com/dockerManager
+module github.com/biblion84/dockerManager
 
 go 1.15
 
